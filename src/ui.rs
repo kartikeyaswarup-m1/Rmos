@@ -1,42 +1,17 @@
-use ratatui::{
-    backend::Backend,
-    layout::{Constraint, Direction, Layout},
-    style::{Modifier, Style},
-    text::{Span, Line},
-    widgets::{Block, Borders, Paragraph},
-    Frame,
-};
+use ratatui::{layout::{Constraint, Direction, Layout}, Frame};
 use crate::system::SystemData;
+use crate::widgets::draw_widgets;
 
-pub fn render<B: Backend>(f: &mut Frame<'_>, sys: &SystemData) {
-    let size = f.size();
-
+pub fn render(f: &mut Frame<'_>, sys: &SystemData) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
-        .margin(2)
+        .margin(1)
         .constraints([
-            Constraint::Percentage(50),
-            Constraint::Percentage(50),
+            Constraint::Length(3),
+            Constraint::Length(3),
+            Constraint::Min(1),
         ])
-        .split(size);
+        .split(f.size());
 
-    let cpu = sys.cpu_usage();
-    let mem_used = sys.used_memory();
-    let mem_total = sys.total_memory();
-
-    let cpu_text = vec![
-        Line::from(vec![Span::styled("CPU Usage", Style::default().add_modifier(Modifier::BOLD))]),
-        Line::from(Span::raw(format!("{:.2}%", cpu))),
-    ];
-
-    let mem_text = vec![
-        Line::from(vec![Span::styled("Memory Usage", Style::default().add_modifier(Modifier::BOLD))]),
-        Line::from(Span::raw(format!("{}/{} KB", mem_used, mem_total))),
-    ];
-
-    let cpu_paragraph = Paragraph::new(cpu_text).block(Block::default().title("CPU").borders(Borders::ALL));
-    let mem_paragraph = Paragraph::new(mem_text).block(Block::default().title("Memory").borders(Borders::ALL));
-
-    f.render_widget(cpu_paragraph, chunks[0]);
-    f.render_widget(mem_paragraph, chunks[1]);
+    draw_widgets(f, sys, chunks[0], chunks[1]);
 }
